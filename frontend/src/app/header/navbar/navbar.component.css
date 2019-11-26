@@ -1,0 +1,16 @@
+.navbar {
+  border-bottom: #6156D9 3px solid;
+  opacity: 0.8;
+}
+
+.nav-link:hover {
+  font-size: 1.1rem;
+}
+
+.nav-item a {
+  color: #fff;
+}
+
+.activated {
+  text-decoration: underline;
+}
