@@ -1,0 +1,32 @@
+#sign-common-section {
+  background: url(/assets/images/background.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 700px;
+}
+
+#sign-common-section .dark-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 700px;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+#sign-common-section .router-content {
+  padding-top: 150px;
+}
+
+.fa-check {
+  color: #6156D9;
+  background: #fff;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+p {
+  font-family: cursive;
+  font-size: 1.2rem;
+}

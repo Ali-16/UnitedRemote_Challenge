@@ -1,1 +1,71 @@
-<p>signup works!</p>
+<div class="card text-center card-form">
+  <div class="card-body pb-5">
+    <h3>Sign Up to see our shops</h3>
+    <p>please fill out this form to register</p>
+    <form [formGroup]="signupForm" (ngSubmit)="onSignup()">
+      <div class="form-group">
+        <input
+          formControlName="email"
+          type="email"
+          class="form-control form-control-lg"
+          placeholder="Email"
+        />
+        <span
+          *ngIf="
+            !signupForm.get('email').valid &&
+            signupForm.get('email').touched &&
+            signupForm.get('email').dirty
+          "
+          class="small"
+          >Please enter a valid email</span
+        >
+      </div>
+      <div formGroupName="passwords">
+        <div class="form-group">
+          <input
+            formControlName="password"
+            type="password"
+            class="form-control form-control-lg"
+            placeholder="Choose a password"
+          />
+          <span
+            *ngIf="
+              !signupForm.get('passwords.password').valid &&
+              signupForm.get('passwords.password').touched &&
+              signupForm.get('passwords.password').dirty
+            "
+            class="small"
+            >Please enter a valid password</span
+          >
+        </div>
+        <div class="form-group">
+          <input
+            formControlName="confirmPassword"
+            type="password"
+            class="form-control form-control-lg"
+            placeholder="Confirm your password"
+          />
+          <span
+            *ngIf="
+              !signupForm.get('passwords').valid &&
+              signupForm.get('passwords.confirmPassword').touched &&
+              signupForm.get('passwords.confirmPassword').dirty
+            "
+            class="small"
+            >Please enter a valid & matching passwords</span
+          >
+        </div>
+      </div>
+      <div class="text-left mb-3">
+        <span>Already registred?</span>
+        <a class="text-white" routerLink="/signin"> Signin!</a>
+      </div>
+      <input
+        type="submit"
+        value="Register"
+        class="btn btn-outline-light btn-block"
+        [disabled]="signupForm.invalid"
+      />
+    </form>
+  </div>
+</div>
