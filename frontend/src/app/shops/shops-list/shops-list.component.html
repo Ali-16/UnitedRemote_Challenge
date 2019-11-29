@@ -5,7 +5,13 @@
       *ngFor="let shopItem of _shops"
       class="col-lg-3 col-md-4 col-sm-6 my-4"
     >
-      <shops-item [shop]="shopItem" [buttons]="_shopsTargeted"></shops-item>
+      <shops-item
+        [shop]="shopItem"
+        [buttons]="_shopsTargeted"
+        (addLiker)="onAddShopLiker(shopItem)"
+        (addDisiker)="onAddShopDisliker(shopItem)"
+        (removeLiker)="onRemoveShopLiker(shopItem)"
+      ></shops-item>
     </div>
   </div>
 </section>

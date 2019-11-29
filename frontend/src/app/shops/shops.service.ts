@@ -142,4 +142,68 @@ export class ShopsService {
       }
     ];
   }
+
+  fetchAllShops(userId: string) {
+    // Implement the logic Here
+    return this.shops;
+  }
+
+  fetchPreferedShops(userId: string) {
+    // Implement the logic Here
+    return this.shops;
+  }
+
+  fetchNearbyShops(userId: string, currentLocation: any) {
+    // Implement the logic Here
+    return this.shops;
+  }
+
+  /**
+   * Sends an Http PUT request to Backend API.
+   * Adds the current user Id in the relevant shop "LikedBy property"
+   * @param shop
+   * @param userId current user Id
+   * @return shop
+   */
+  addShopLiker(shop: Shop, userId: string) {
+    // Implement the logic Here
+    return shop;
+  }
+
+  /**
+   * Sends an Http PUT request to Backend API.
+   * Adds the current {user Id , date} JS Object in the relevant shop "DislikedBy property"
+   * @param shop
+   * @param userId current user Id
+   * @return shop
+   */
+  addShopDisliker(shop: Shop, userId: string) {
+    // Implement the logic Here
+    const timestamp = new Date().getTime();
+    return shop;
+  }
+
+  /**
+   * Sends an Http PUT request to Backend API.
+   * removes the current user Id from the relevant shop "LikedBy property"
+   * @param shop
+   * @param userId current user Id
+   * @return shop
+   */
+  removeShopLiker(shop: Shop, userId: string) {
+    // Implement the logic Here
+    return shop;
+  }
+
+  /**
+   * Sends an Http PUT request to Backend API.
+   * Removes the {user Id , date} JS Object from the relevant shop "DislikedBy property", after two hours from specified date
+   * @param shop
+   * @param userId current user Id
+   * @return shop
+   */
+  removeShopDisliker(shop: Shop, userId: string) {
+    // Implement the logic Here
+    return shop;
+  }
 }

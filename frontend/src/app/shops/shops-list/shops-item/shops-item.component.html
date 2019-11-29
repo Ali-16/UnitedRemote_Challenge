@@ -4,22 +4,26 @@
   <!-- Different buttons relatively to routes -->
   <div [ngSwitch]="buttons">
     <div *ngSwitchCase="'all'" class="d-flex justify-content-between mt-3">
-      <button class="btn btn-danger">
+      <button class="btn btn-danger" (click)="onAddDisliker()">
         Dislike
       </button>
-      <button class="btn btn-success">
+      <button class="btn btn-success" (click)="onAddLiker()">
         Like
       </button>
     </div>
     <div *ngSwitchCase="'nearby'" class="d-flex justify-content-between mt-3">
-      <button class="btn btn-success">
+      <button class="btn btn-success" (click)="onAddLiker()">
         Like
       </button>
-      <button class="btn btn-danger">
+      <button class="btn btn-danger" (click)="onAddDisliker()">
         Dislike
       </button>
     </div>
-    <button *ngSwitchCase="'prefered'" class="btn btn-danger mt-3 remove">
+    <button
+      *ngSwitchCase="'prefered'"
+      class="btn btn-danger mt-3 remove"
+      (click)="onRemoveLiker()"
+    >
       Remove
     </button>
   </div>
