@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Params } from "@angular/router";
 import { ShopsService } from "../shops.service";
 import { Shop } from "../shop.model";
+import { GeoLocationService } from "../geo-location.service";
 
 @Component({
   selector: "app-shops-list",
@@ -27,12 +28,14 @@ export class ShopsListComponent implements OnInit {
 
   constructor(
     private shopsService: ShopsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private locationService: GeoLocationService
   ) {}
 
   ngOnInit() {
     this._shops = this.shopsService.shops;
     this.guessShopsTargeted();
+    this.getLocation();
   }
 
   /**
@@ -42,6 +45,25 @@ export class ShopsListComponent implements OnInit {
   guessShopsTargeted() {
     this.route.params.subscribe((params: Params) => {
       this._shopsTargeted = params["target"];
+    });
+  }
+
+  /**
+   * use location service to location of the current user
+   * if he permits geolocation, alert user on it.
+   */
+  private getLocation() {
+    this.route.params.subscribe((params: Params) => {
+      if (params["target"] === "nearby") {
+        this.locationService
+          .getPosition()
+          .catch(error => {
+            alert(error.message);
+          })
+          .then(position => {
+            alert(`Positon: ${position.lng} , ${position.lat}`);
+          });
+      }
     });
   }
 
