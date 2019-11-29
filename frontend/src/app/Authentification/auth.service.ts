@@ -10,7 +10,7 @@ import { Credentials } from "./credentials.model";
  * Is responsible of Authentication logic
  */
 export class AuthService {
-  private _loggedIn = false;
+  private _loggedIn = true;
 
   constructor() {}
 

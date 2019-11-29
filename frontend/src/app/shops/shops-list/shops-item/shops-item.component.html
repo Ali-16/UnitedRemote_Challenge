@@ -1,1 +1,27 @@
-<p>shops-item works!</p>
+<div class="card bg-white text-dark p-4">
+  <p>{{ shop.name }}</p>
+  <img class="card-img img-fliud" src="{{ shop.picture }}" alt="shop 1" />
+  <!-- Different buttons relatively to routes -->
+  <div [ngSwitch]="buttons">
+    <div *ngSwitchCase="'all'" class="d-flex justify-content-between mt-3">
+      <button class="btn btn-danger">
+        Dislike
+      </button>
+      <button class="btn btn-success">
+        Like
+      </button>
+    </div>
+    <div *ngSwitchCase="'nearby'" class="d-flex justify-content-between mt-3">
+      <button class="btn btn-success">
+        Like
+      </button>
+      <button class="btn btn-danger">
+        Dislike
+      </button>
+    </div>
+    <button *ngSwitchCase="'prefered'" class="btn btn-danger mt-3 remove">
+      Remove
+    </button>
+  </div>
+  <!-- Different buttons relatively to routes End -->
+</div>

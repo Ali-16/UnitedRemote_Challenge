@@ -1,1 +1,11 @@
-<p>shops-list works!</p>
+<!-- render shops [buttons] differently  (prefered or nearby...)  -->
+<section class="shops-common-section container">
+  <div class="row">
+    <div
+      *ngFor="let shopItem of _shops"
+      class="col-lg-3 col-md-4 col-sm-6 my-4"
+    >
+      <shops-item [shop]="shopItem" [buttons]="_shopsTargeted"></shops-item>
+    </div>
+  </div>
+</section>

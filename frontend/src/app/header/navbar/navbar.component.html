@@ -3,7 +3,13 @@
   id="main-nav"
 >
   <div class="container">
-    <a class="navbar-brand " href="#">CataShops</a>
+    <a class="navbar-brand " href="#"
+      ><img
+        src="assets/images/Logo.png"
+        width="40rem"
+        alt="Logo"
+        class="d-inline-block align-middle mr-2"
+    /></a>
     <button
       class="navbar-toggler"
       data-toggle="collapse"
@@ -12,13 +18,13 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
-      <ul class="navbar-nav ml-auto">
+      <ul *ngIf="isAuthenticated" class="navbar-nav ml-auto authenticated-nav">
         <li
           routerLinkActive="activated"
           [routerLinkActiveOptions]="{ exact: true }"
           class="nav-item"
         >
-          <a class="nav-link" routerLink="shops">Home</a>
+          <a class="nav-link" routerLink="shops/all">Home</a>
         </li>
         <li routerLinkActive="activated" class="nav-item">
           <a class="nav-link" routerLink="shops/nearby">Nearby shops</a>
@@ -27,13 +33,18 @@
           <a class="nav-link" routerLink="shops/prefered">prefered shops</a>
         </li>
         <li routerLinkActive="activated" class="nav-item">
+          <a class="nav-link" routerLink="">Sign Out</a>
+        </li>
+      </ul>
+      <ul
+        *ngIf="!isAuthenticated"
+        class="navbar-nav ml-auto unauthenticated-nav"
+      >
+        <li routerLinkActive="activated" class="nav-item">
           <a class="nav-link" routerLink="/signin">Sign In</a>
         </li>
         <li routerLinkActive="activated" class="nav-item">
           <a class="nav-link" routerLink="/signup">Sign Up</a>
-        </li>
-        <li routerLinkActive="activated" class="nav-item">
-          <a class="nav-link" routerLink="">Sign Out</a>
         </li>
       </ul>
     </div>
