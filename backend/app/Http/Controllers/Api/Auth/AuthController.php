@@ -18,7 +18,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'signup']]);
+        $this->middleware('auth:api', ['except' => ['signIn', 'signUp']]);
     }
 
     /**
@@ -42,10 +42,10 @@ class AuthController extends Controller
      * @param request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function signup(SignUpRequest $request)
+    public function signUp(SignUpRequest $request)
     {
         User::create($request->all());
-        return $this->login($request);
+        return $this->signIn($request);
     }
 
     /**
