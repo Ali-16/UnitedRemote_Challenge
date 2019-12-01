@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Params } from "@angular/router";
+import { ActivatedRoute, Params, Router } from "@angular/router";
+
 import { ShopsService } from "../shops.service";
 import { Shop } from "../shop.model";
 import { GeoLocationService } from "../geo-location.service";
@@ -28,6 +29,7 @@ export class ShopsListComponent implements OnInit {
 
   constructor(
     private shopsService: ShopsService,
+    private router: Router,
     private route: ActivatedRoute,
     private locationService: GeoLocationService
   ) {}
@@ -44,7 +46,12 @@ export class ShopsListComponent implements OnInit {
    */
   guessShopsTargeted() {
     this.route.params.subscribe((params: Params) => {
-      this._shopsTargeted = params["target"];
+      if(['all','prefered','nearby'].includes(params['target'])){
+        this._shopsTargeted = params["target"];
+      }
+      else{
+        this.router.navigateByUrl('/shops/all');
+      }
     });
   }
 

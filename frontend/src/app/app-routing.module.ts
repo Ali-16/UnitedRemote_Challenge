@@ -3,15 +3,16 @@ import { Routes, RouterModule } from "@angular/router";
 
 import { AuthComponent } from "./Authentification/auth/auth.component";
 import { ShopsListComponent } from "./shops/shops-list/shops-list.component";
-import { AuthGuard } from "./Authentification/auth.guard";
+import { BeforeLoginGuard } from "./Authentification/before-login.guard";
+import { AfterLoginGuard } from "./Authentification/after-login.guard";
 
 const routes: Routes = [
-  { path: "signin", component: AuthComponent },
-  { path: "signup", component: AuthComponent },
+  { path: "signin", component: AuthComponent, canActivate: [BeforeLoginGuard] },
+  { path: "signup", component: AuthComponent, canActivate: [BeforeLoginGuard] },
   {
     path: "shops/:target",
     component: ShopsListComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AfterLoginGuard]
   },
   { path: "**", redirectTo: "shops/all" }
 ];

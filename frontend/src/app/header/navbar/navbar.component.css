@@ -1,6 +1,7 @@
 .navbar {
   border-bottom: #6156D9 3px solid;
   opacity: 0.8;
+  padding: 0;
 }
 
 .nav-link:hover {

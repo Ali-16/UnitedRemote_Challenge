@@ -3,10 +3,9 @@
   background-color: #6156D9;
 }
 
-input.ng-valid {
-  border-right: .2rem solid green;
+.card > *{
+  color: #F6EBFF;
 }
-
-input.ng-invalid.ng-touched.ng-dirty {
-  border-right: .2rem solid red;
+.form-control{
+  color: black;
 }

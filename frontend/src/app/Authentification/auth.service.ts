@@ -1,4 +1,11 @@
 import { Injectable } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { throwError, BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
+
+
+import { TokenService } from 'src/app/shared/token.service';
 import { Credentials } from "./credentials.model";
 
 @Injectable({
@@ -10,50 +17,75 @@ import { Credentials } from "./credentials.model";
  * Is responsible of Authentication logic
  */
 export class AuthService {
-  private _loggedIn = true;
+  private isAuthenticated = new BehaviorSubject<boolean> (this.tokenService.loggedIn());
+  private apiUrl: string = 'http://127.0.0.1:8000/api';
+  public authStatus = this.isAuthenticated.asObservable();
 
-  constructor() {}
-
-  get loggedIn() {
-    return this._loggedIn;
-  }
-
-  set loggedIn(state: boolean) {
-    this._loggedIn = state;
-  }
+  constructor(
+    private http: HttpClient,
+    private tokenService: TokenService,
+    private router : Router
+    ) { }
 
   /**
-   * Verifies asynchronously if the user is authenticated or not
-   * @return Promise (the API response)
+   * Switch the authentication status between true and false
+   * Prevents subscribers to this status
    */
-  isAuthenticated() {
-    const promise = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(this._loggedIn);
-      }, 1000);
-    });
-    return promise;
+  changeAuthStatus(value: boolean){
+    this.isAuthenticated.next(value);
   }
 
   /**
    * Tries to log the user in the application with passed credentials,
-   * @param email
-   * @param password
-   * @return Promise (the API response)
+   * by sending a request to backend API
+   * @param credentials
+   * @return rxjs/Observable
    */
-  signIn({ email, password }: Credentials) {
-    this._loggedIn = true;
-    console.log(this._loggedIn);
+  signIn(credentials: Credentials) {
+    return this.http
+      .post(`${this.apiUrl}/signin`, credentials)
+      .pipe(catchError(respError => this.handleSentError(respError)
+      ));
   }
 
   /**
-   * Tries to register the user in the application with passed credentials,
-   * @param email
-   * @param password
-   * @return Promise (the API response)
+   * Tries to register the user the application with passed credentials,
+   * by sending a request to backend API
+   * @param credentials
+   * @return rxjs/Observable
    */
-  signOut({ email, password }: Credentials) {
-    this._loggedIn = false;
-    console.log(this._loggedIn);
+  signUp(credentials: Credentials) {
+    return this.http
+      .post(`${this.apiUrl}/signup`, credentials)
+      .pipe(catchError(respError => this.handleSentError(respError)
+      ));
   }
+
+  /** 
+   * Handles response data
+   * Calls tokenService to deal with recieved JWT token
+   * Log the user in the application and prevent subscribers to auth status
+   */
+  handleSentData(data){
+    this.tokenService.handleRecievedToken(data.access_token);
+    this.changeAuthStatus(true);
+    this.router.navigateByUrl('/shops/all');
+  }
+
+  /** 
+   * Handles eventual sent Error from api backend to authenticating requests
+   * Returns them to sign-related components to display
+   * @param sentError
+  */
+  handleSentError(sentError) {
+    let errorMessage = 'An unknown error occured!';
+    if (!sentError.error) {
+      return throwError(errorMessage);
+    }
+    else if (sentError.error && !sentError.error.errors) {
+      return throwError(sentError.error.error);
+    }
+    return throwError(sentError.error.errors);
+  }
+
 }

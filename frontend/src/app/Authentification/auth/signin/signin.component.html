@@ -1,56 +1,49 @@
 <div class="card text-center card-form">
-  <div class="card-body pb-5">
+  <div class="card-body pb-1">
+
     <h3>Sign in to see our shops</h3>
     <p>please fill out this form to login</p>
+
     <form [formGroup]="signinForm" (ngSubmit)="onSignin()">
-      <div class="form-group">
-        <input
-          formControlName="email"
-          type="email"
-          class="form-control form-control-lg"
-          placeholder="Email"
-        />
-        <span
-          *ngIf="
-            !signinForm.get('email').valid &&
-            signinForm.get('email').touched &&
-            signinForm.get('email').dirty
-          "
-          class="small"
-          >Please enter a valid email</span
-        >
+      <div id="email" class="form-group">
+        <input formControlName="email" type="email"
+          [ngClass]="{'is-invalid':isInValid(email),'is-valid':isValid(email)}" class="form-control"
+          placeholder="Email" />
+        <small *ngIf="isInValid(email) && !authErrors" class="d-block text-left mt-1">enter a valid email
+        </small>
+        <small *ngIf="authErrors && !unauthenticated" class="d-block text-left">{{authErrors.email}}
+        </small>
+        <small *ngIf="unauthenticated" class="d-block text-left">{{unauthenticated}}
+        </small>
       </div>
 
-      <div class="form-group">
-        <input
-          formControlName="password"
-          type="password"
-          class="form-control form-control-lg"
-          placeholder="Choose a password"
-        />
-        <span
-          *ngIf="
-            !signinForm.get('password').valid &&
-            signinForm.get('password').touched &&
-            signinForm.get('password').dirty
-          "
-          class="small"
-          >Please enter a valid password - Min : 6 charachters</span
-        >
+      <div id="password" class="form-group">
+        <input formControlName="password" type="password" [ngClass]="{'is-invalid':isInValid(password)}"
+          class="form-control" placeholder="Choose a password" />
+        <small *ngIf="!authErrors" class="d-block text-left mt-1">Must be 6-25 characters long.
+        </small>
+        <small *ngIf="isInValid(password) && !authErrors" class="d-block small text-left mt-1">enter a valid password
+        </small>
+        <small *ngIf="authErrors && !unauthenticated" class="d-block text-left">{{authErrors.password}}
+        </small>
       </div>
-      <div class="text-left mb-3">
-        <a class="text-white" routerLink="/signin">Forgot password? </a>
+
+      <div id="optoins">
+        <a class="d-block text-left mb-3 text-white" routerLink="/signin">
+          Forgot password?
+        </a>
+        <div class="text-left mb-3">
+          <span>Not registred? </span>
+          <a class="text-white" routerLink="/signup">Signup!</a>
+        </div>
       </div>
-      <div class="text-left mb-3">
-        <span>Not registred? </span>
-        <a class="text-white" routerLink="/signup">Signup!</a>
-      </div>
-      <input
-        type="submit"
-        value="Login"
-        class="btn btn-outline-light btn-block"
-        [disabled]="signinForm.invalid"
-      />
+
+      <button class="btn btn-outline-light btn-block mb-4" type="submit" [disabled]="signinForm.invalid">
+        Login
+        <span [ngClass]="{'spinner-grow': isLoading, 'spinner-grow-sm': isLoading}" role="status" aria-hidden="true">
+        </span>
+      </button>
     </form>
+
   </div>
 </div>

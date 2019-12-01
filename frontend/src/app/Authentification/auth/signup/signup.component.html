@@ -1,71 +1,61 @@
 <div class="card text-center card-form">
-  <div class="card-body pb-5">
+  <div class="card-body pb-1">
     <h3>Sign Up to see our shops</h3>
     <p>please fill out this form to register</p>
+
     <form [formGroup]="signupForm" (ngSubmit)="onSignup()">
-      <div class="form-group">
-        <input
-          formControlName="email"
-          type="email"
-          class="form-control form-control-lg"
-          placeholder="Email"
-        />
-        <span
-          *ngIf="
-            !signupForm.get('email').valid &&
-            signupForm.get('email').touched &&
-            signupForm.get('email').dirty
-          "
-          class="small"
-          >Please enter a valid email</span
-        >
+
+      <div id="email" class="form-group">
+        <input formControlName="register_email" type="email"
+          [ngClass]="{'is-invalid':isInValid(register_email),'is-valid':isValid(register_email)}" class="form-control"
+          placeholder="Email" />
+        <small *ngIf="isInValid(register_email) && !authErrors" class="d-block text-left mt-1">Please enter a valid
+          email
+        </small>
+        <small *ngIf="authErrors" class="d-block text-left">{{authErrors.register_email}}
+        </small>
       </div>
+
       <div formGroupName="passwords">
+
         <div class="form-group">
-          <input
-            formControlName="password"
-            type="password"
-            class="form-control form-control-lg"
-            placeholder="Choose a password"
-          />
-          <span
-            *ngIf="
-              !signupForm.get('passwords.password').valid &&
-              signupForm.get('passwords.password').touched &&
-              signupForm.get('passwords.password').dirty
-            "
-            class="small"
-            >Please enter a valid password</span
-          >
+          <input formControlName="register_password" type="password"
+            [ngClass]="{'is-invalid':isInValid(register_password),'is-valid':isValid(register_password)}"
+            class="form-control" placeholder="Choose a password" />
+          <small *ngIf="!authErrors" class="d-block text-left mt-1">Must be 6-25 characters long.
+          </small>
+          <small *ngIf="isInValid(register_password) && !authErrors" class=" d-block text-left mt-1">Please enter a
+            valid password
+          </small>
+          <small *ngIf="authErrors" class="d-block text-left">{{authErrors.register_password}}
+          </small>
         </div>
+
         <div class="form-group">
-          <input
-            formControlName="confirmPassword"
-            type="password"
-            class="form-control form-control-lg"
-            placeholder="Confirm your password"
-          />
-          <span
-            *ngIf="
-              !signupForm.get('passwords').valid &&
-              signupForm.get('passwords.confirmPassword').touched &&
-              signupForm.get('passwords.confirmPassword').dirty
-            "
-            class="small"
-            >Please enter a valid & matching passwords</span
-          >
+          <input formControlName="register_password_confirmation" type="password"
+            [ngClass]="{'is-invalid':isConfirmInvalid()}" class="form-control" placeholder="Confirm your password" />
+          <small *ngIf="isConfirmInvalid() && !authErrors" class="d-block text-left mt-1">Please enter a valid &
+            matching
+            passwords
+          </small>
+          <small *ngIf="authErrors && isValid(register_password)"
+            class="d-block text-left">{{authErrors.register_password}}
+          </small>
         </div>
+
       </div>
-      <div class="text-left mb-3">
+
+      <div id="Options" class="text-left mb-3">
         <span>Already registred?</span>
         <a class="text-white" routerLink="/signin"> Signin!</a>
       </div>
-      <input
-        type="submit"
-        value="Register"
-        class="btn btn-outline-light btn-block"
-        [disabled]="signupForm.invalid"
-      />
+
+      <button class="btn btn-outline-light btn-block mb-4" type="submit" [disabled]="signupForm.invalid">
+        Register
+        <span [ngClass]="{'spinner-grow': isLoading, 'spinner-grow-sm': isLoading}" role="status"
+          aria-hidden="true"></span>
+      </button>
+
     </form>
   </div>
 </div>

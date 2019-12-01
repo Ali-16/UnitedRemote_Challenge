@@ -6,6 +6,10 @@
   min-height: 700px;
 }
 
+#sign-common-section p{
+  color: #F6EBFF;
+}
+
 #sign-common-section .dark-overlay {
   position: absolute;
   top: 0;
@@ -21,7 +25,7 @@
 
 .fa-check {
   color: #6156D9;
-  background: #fff;
+  background: #F6EBFF;
   padding: 5px;
   border-radius: 5px;
 }

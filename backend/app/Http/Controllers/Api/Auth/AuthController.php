@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Api\Auth;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SignUpRequest;
+use App\Http\Requests\SignRequest;
 use App\User;
-
 
 
 class AuthController extends Controller
@@ -22,30 +21,34 @@ class AuthController extends Controller
     }
 
     /**
-     * Tries to log a user in and get a JWT.
+     * Tries to log a user and responde with a jwt token 
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function signIn()
+    public function signIn(SignRequest $request)
     {
         $credentials = request(['email', 'password']);
-
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => "Email or Password doesn't exist"], 401);
+            return response()->json(['error' => "Email & Password don't match"], 401);
         }
 
         return $this->respondWithToken($token);
     }
 
     /**
-     * Register a new User
+     * Register a new User, authenticate it, 
      * @param request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function signUp(SignUpRequest $request)
+    public function signUp(SignRequest $request)
     {
-        User::create($request->all());
-        return $this->signIn($request);
+        $credentials['email'] = $request->register_email;
+        $credentials['password'] = $request->register_password;
+
+        User::create($credentials);
+        $token = auth()->attempt($credentials);
+
+        return $this->respondWithToken($token);
     }
 
     /**
