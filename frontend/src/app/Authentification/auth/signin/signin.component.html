@@ -20,9 +20,7 @@
       <div id="password" class="form-group">
         <input formControlName="password" type="password" [ngClass]="{'is-invalid':isInValid(password)}"
           class="form-control" placeholder="Choose a password" />
-        <small *ngIf="!authErrors" class="d-block text-left mt-1">Must be 6-25 characters long.
-        </small>
-        <small *ngIf="isInValid(password) && !authErrors" class="d-block small text-left mt-1">enter a valid password
+        <small *ngIf="isInValid(password) && !authErrors" class="d-block small text-left mt-1">Please enter a valid password - must be 6-25 characters long.
         </small>
         <small *ngIf="authErrors && !unauthenticated" class="d-block text-left">{{authErrors.password}}
         </small>
