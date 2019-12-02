@@ -1,17 +1,26 @@
 <!-- render shops [buttons] differently  (prefered or nearby...)  -->
 <section class="shops-common-section container">
-  <div class="row">
-    <div
-      *ngFor="let shopItem of _shops"
-      class="col-lg-3 col-md-4 col-sm-6 my-4"
-    >
-      <shops-item
-        [shop]="shopItem"
-        [buttons]="_shopsTargeted"
-        (addLiker)="onAddShopLiker(shopItem)"
-        (addDisiker)="onAddShopDisliker(shopItem)"
-        (removeLiker)="onRemoveShopLiker(shopItem)"
-      ></shops-item>
+  <!-- Infinte Scrolling Area - Start -->
+  <div class="search-results" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
+    (scrolled)="onScroll()">
+    <!-- Shops Section -->
+    <div class="row">
+      <div *ngFor="let shopItem of shops" class="col-lg-3 col-md-4 col-sm-6 my-4">
+        <shops-item [shop]="shopItem" [buttons]="targetedShops" (addLiker)="onAddShopLiker(shopItem)"
+          (addDisiker)="onAddShopDisliker(shopItem)" (removeLiker)="onRemoveShopLiker(shopItem)"></shops-item>
+      </div>
+    </div>
+    <!-- Shops Section End -->
+  </div>
+  <!-- Infinte Scrolling Area - End -->
+
+  <!-- Spinner - Start -->
+  <div class="row pb-5">
+    <div class="col-md-12 p-5">
+      <ngx-spinner bdOpacity=0.9 bdColor="" size="default" color="#581f87" type="ball-pulse-sync" [fullScreen]="false">
+      </ngx-spinner>
     </div>
   </div>
+  <!-- Spinner - End -->
+
 </section>

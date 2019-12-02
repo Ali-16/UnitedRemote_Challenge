@@ -1,11 +1,12 @@
-import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
-
-import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { ReactiveFormsModule } from "@angular/forms";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { AppRoutingModule } from "./app-routing.module";
 import { HttpClientModule } from '@angular/common/http';
+import { BrowserModule } from "@angular/platform-browser";
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { AuthComponent } from "./Authentification/auth/auth.component";
 import { SigninComponent } from "./Authentification/Auth/signin/signin.component";
@@ -29,9 +30,10 @@ import { ShopsItemComponent } from "./shops/shops-list/shops-item/shops-item.com
   imports: [
     BrowserModule,
     AppRoutingModule,
-    BrowserAnimationsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    InfiniteScrollModule,
+    NgxSpinnerModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

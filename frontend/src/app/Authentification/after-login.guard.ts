@@ -34,6 +34,13 @@ export class AfterLoginGuard implements CanActivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-    return this.tokenService.loggedIn();
+      return this.tokenService.loggedIn();
+    // let isAuthenticated = this.tokenService.loggedIn();
+    // if (isAuthenticated){
+    //   return isAuthenticated;
+    // }
+    // else{
+    //   this.router.navigateByUrl('/login');
+    // }
   }
 }
