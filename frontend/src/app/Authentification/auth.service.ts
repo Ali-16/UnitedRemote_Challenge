@@ -17,21 +17,21 @@ import { Credentials } from "./credentials.model";
  * Is responsible of Authentication logic
  */
 export class AuthService {
-  private isAuthenticated = new BehaviorSubject<boolean> (this.tokenService.loggedIn());
+  private isAuthenticated = new BehaviorSubject<boolean>(this.tokenService.loggedIn());
   private apiUrl: string = 'http://127.0.0.1:8000/api';
   public authStatus = this.isAuthenticated.asObservable();
 
   constructor(
     private http: HttpClient,
     private tokenService: TokenService,
-    private router : Router
-    ) { }
+    private router: Router
+  ) { }
 
   /**
    * Switch the authentication status between true and false
    * Prevents subscribers to this status
    */
-  changeAuthStatus(value: boolean){
+  changeAuthStatus(value: boolean) {
     this.isAuthenticated.next(value);
   }
 
@@ -66,7 +66,8 @@ export class AuthService {
    * Calls tokenService to deal with recieved JWT token
    * Log the user in the application and prevent subscribers to auth status
    */
-  handleSentData(data){
+  handleSentData(data) {
+    this.tokenService.setUserId(data.userId);
     this.tokenService.handleRecievedToken(data.access_token);
     this.changeAuthStatus(true);
     this.router.navigateByUrl('/shops/all');

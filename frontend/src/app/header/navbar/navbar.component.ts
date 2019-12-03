@@ -16,7 +16,7 @@ export class NavbarComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private tokenService: TokenService
-    ) {}
+  ) { }
 
   /**
    * When initiating the navbar, it subscribes to the authentication status
@@ -30,10 +30,11 @@ export class NavbarComponent implements OnInit {
    * After confirm by the user, he is logging out. remove the token from localStorage
    * All the subscribers to Subject are getting the new status
    */
-  logout(event: MouseEvent){
+  logout(event: MouseEvent) {
     event.preventDefault();
-    if (confirm('Are you sure you want to logout?')){
+    if (confirm('Are you sure you want to logout?')) {
       this.tokenService.removeToken();
+      this.tokenService.removeUserId();
       this.router.navigateByUrl('/signin');
       this.authService.changeAuthStatus(false);
     }

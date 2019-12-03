@@ -5,6 +5,7 @@ import { ActivatedRoute, Params, Router } from "@angular/router";
 import { ShopsService } from "../shops.service";
 import { Shop } from "../shop.model";
 import { GeoLocationService } from "../geo-location.service";
+import { TokenService } from 'src/app/shared/token.service';
 
 @Component({
   selector: "app-shops-list",
@@ -17,10 +18,11 @@ import { GeoLocationService } from "../geo-location.service";
  * Manage display of shops (ifinite scrolling)
  */
 export class ShopsListComponent implements OnInit {
+  private userId: string;
   public shops: Shop[] = [];
   private targetedShops: string;
   private currentPage: number = 1;
-  private emptyShop: boolean = false;
+  private moreToFetch: boolean = false;
   private isScrolling: boolean = false;
 
   constructor(
@@ -29,11 +31,13 @@ export class ShopsListComponent implements OnInit {
     private route: ActivatedRoute,
     private locationService: GeoLocationService,
     private shopsService: ShopsService,
+    private tokenService: TokenService,
   ) { }
 
   ngOnInit() {
+    this.userId = this.tokenService.getUserId();
     this.guesstargetedShops();
-    this.fetchShops(this.targetedShops, this.currentPage);
+    this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
     if (this.targetedShops === 'nearby') {
       this.getLocation();
     }
@@ -41,12 +45,13 @@ export class ShopsListComponent implements OnInit {
 
   /**
    * Calls shopService to fetch wanted shops, 
-   * by giving targetedShops and page number for backend API
-   * @param  target
-   * @param  page
+   * by giving authenticated userId, targetedShops and page number for backend API
+   * @param userId
+   * @param target
+   * @param page
     */
-  fetchShops(target: string, page: number) {
-    this.shopsService.fetchAllShops(target, page).subscribe(
+  onFetchShops(userId: string, target: string, page: number) {
+    this.shopsService.fetchShops(userId, target, page).subscribe(
       responseData => {
         this.handleResponse(responseData);
         this.spinner.hide();
@@ -59,26 +64,31 @@ export class ShopsListComponent implements OnInit {
   }
 
   /** 
-   * Handles Shops-related response sent by backend API
+   * Handles Shops-related response sent by backend API,
+   * Is awared of whether is more shops to fetch
+   * @param data : Shop[]
    */
-  handleResponse(data) {
-    let loadedShops = data['data'];
-    this.emptyShop = (loadedShops.length === 0) ? true : false;
-    this.shops = this.shops.concat(loadedShops);
-    this.isScrolling = false;
+  handleResponse(data: Shop[]) {
+    let loadedShops = data;
+    this.moreToFetch = (loadedShops == null) ? true : false;
+    if (!this.moreToFetch) {
+      this.shops = this.shops.concat(loadedShops);
+      this.isScrolling = false;
+    }
+
   }
 
   /**
    * Triggered when the user scrolls Down
    * Increments the page number to send in http request to backend,
-   * shows Spinner, and use shopService to fetch new shops
+   * shows Spinner, then use shopService to fetch new shops
     */
   onScroll() {
-    if (!this.isScrolling && !this.emptyShop) {
+    if (!this.isScrolling && !this.moreToFetch) {
       this.currentPage++;
       this.spinner.show();
       this.isScrolling = true;
-      this.fetchShops(this.targetedShops, this.currentPage);
+      this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
     }
   }
 

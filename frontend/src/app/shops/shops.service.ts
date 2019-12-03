@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 
 import { Shop } from "./shop.model";
 
@@ -17,11 +18,43 @@ export class ShopsService {
   constructor(private http: HttpClient) {
   }
 
-  fetchAllShops(shopsTargeted,page) {
-    shopsTargeted = "all";
+  /** 
+   * Send Http Request to API backend to fetch Shops, handle response with handlefetchedshops method
+   * Needs type of targeted shops, ID of authenticated user, and page to declare to API paginator
+   * @param userId
+   * @param targetedShops
+   * @param page
+   * @return httpResponse
+   */
+  fetchShops(userId: string, targetedShops: string, page: number) {
     return this.http
-      .get(`${this.apiUrl}/shops/${shopsTargeted}?page=${page}`);
+      .get(`${this.apiUrl}/shops/${targetedShops}?page=${page}&UID=${userId}`,
+        { observe: 'response' })
+      .pipe(
+        map(response => this.handlefetchedshops(response)
+        ));
   }
+
+  /** 
+   * Checks if there is no more shops to fetch, 
+   * Converts response data from JSON to array
+   * @param httpResponse
+   * @return shopsArray 
+   */
+  private handlefetchedshops(response) {
+    if (response.status == 204) {
+      return response.body;
+    }
+    else {
+      const shopsArray: Shop[] = [];
+      for (let shopIndex in response.body) {
+        shopsArray.push(response.body[shopIndex]);
+      }
+      return shopsArray;
+    }
+
+  }
+
 
   fetchPreferedShops(userId: string) {
     // Implement the logic Here
