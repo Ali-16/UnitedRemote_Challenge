@@ -51,9 +51,10 @@ export class ShopsListComponent implements OnInit {
    * @param page
     */
   onFetchShops(userId: string, target: string, page: number) {
+    console.log('onFetchShops()');
     this.shopsService.fetchShops(userId, target, page).subscribe(
       responseData => {
-        this.handleResponse(responseData);
+        this.handleFetchResponse(responseData);
         this.spinner.hide();
       },
       responseError => {
@@ -68,12 +69,18 @@ export class ShopsListComponent implements OnInit {
    * Is awared of whether is more shops to fetch
    * @param data : Shop[]
    */
-  handleResponse(data: Shop[]) {
+  private handleFetchResponse(data: Shop[]) {
+    console.log('handleFetchResponse()');
     let loadedShops = data;
-    this.moreToFetch = (loadedShops == null) ? true : false;
-    if (!this.moreToFetch) {
+    this.moreToFetch = (loadedShops !== null) ? true : false;
+    if (this.moreToFetch) {
       this.shops = this.shops.concat(loadedShops);
       this.isScrolling = false;
+    }
+
+    if (loadedShops.length < 10) {
+      console.log('loadedshops.length = ', loadedShops.length)
+      this.onScroll();
     }
 
   }
@@ -83,9 +90,11 @@ export class ShopsListComponent implements OnInit {
    * Increments the page number to send in http request to backend,
    * shows Spinner, then use shopService to fetch new shops
     */
-  onScroll() {
-    if (!this.isScrolling && !this.moreToFetch) {
+  private onScroll() {
+    console.log(' onScroll!! ');
+    if (!this.isScrolling && this.moreToFetch) {
       this.currentPage++;
+      console.log(' page ', this.currentPage);
       this.spinner.show();
       this.isScrolling = true;
       this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
@@ -96,10 +105,13 @@ export class ShopsListComponent implements OnInit {
    * Guess the type of shops targeted in function of current Url
    * Subscribes to activated route observable
    */
-  guesstargetedShops() {
+  private guesstargetedShops() {
     this.route.params.subscribe((params: Params) => {
       if (['all', 'prefered', 'nearby'].includes(params['target'])) {
         this.targetedShops = params["target"];
+        this.shops = [];
+        this.currentPage = 1;
+        this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
       }
       else {
         this.router.navigateByUrl('/shops/all');
@@ -114,8 +126,14 @@ export class ShopsListComponent implements OnInit {
    * @param userId current User Id
    */
   onAddShopLiker(shop: Shop, userId: string) {
-    this.shopsService.addShopLiker(shop, userId);
-    this.shops.splice(this.shops.indexOf(shop), 1);
+    this.shopsService.addShopLiker(shop, this.userId).subscribe(
+      responseData => {
+        this.handleLikeResponse(responseData);
+      }
+    );
+    if (this.targetedShops === 'all') {
+      this.shops.splice(this.shops.indexOf(shop), 1);
+    }
   }
 
   /**
@@ -124,11 +142,23 @@ export class ShopsListComponent implements OnInit {
    * @param shop Shop relevant to the event
    * @param userId current User Id
    */
-  onAddShopDisliker(shop: Shop, userId: string) {
-    this.shopsService.addShopDisliker(shop, userId);
-    if (this.targetedShops === "nearby") {
+  onAddShopDisliker(shop: Shop) {
+    this.shopsService.addShopDisliker(shop, this.userId).subscribe(
+      responseData => {
+        this.handleDislikeResponse(responseData);
+      }
+    );
+    if (this.targetedShops === 'nearby') {
       this.shops.splice(this.shops.indexOf(shop), 1);
     }
+  }
+
+  private handleDislikeResponse(data) {
+    console.log(data);
+  }
+
+  private handleLikeResponse(data) {
+    console.log(data);
   }
 
   /**

@@ -16,11 +16,11 @@ export class ShopsItemComponent implements OnInit {
   @Input() shop: Shop;
   @Input() buttons: string;
   @Output() addLiker = new EventEmitter();
-  @Output() addDisiker = new EventEmitter();
+  @Output() addDisliker = new EventEmitter();
   @Output() removeLiker = new EventEmitter();
-  constructor() {}
+  constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   /**
    * Triggered when user click on the "Like button".
@@ -35,7 +35,7 @@ export class ShopsItemComponent implements OnInit {
    * Emits an event to Shops-list component to trigger the "onAddShopDisLiker()" method
    */
   onAddDisliker() {
-    this.addDisiker.emit();
+    this.addDisliker.emit();
   }
   /**
    * Triggered when user click on the "Remove button".

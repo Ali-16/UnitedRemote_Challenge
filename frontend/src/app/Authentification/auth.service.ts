@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
-import { throwError, BehaviorSubject } from 'rxjs';
+import { throwError, BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 
 
 import { TokenService } from 'src/app/shared/token.service';
 import { Credentials } from "./credentials.model";
+import * as globals from "src/app/shared/globals"
 
 @Injectable({
   providedIn: "root"
@@ -18,7 +19,7 @@ import { Credentials } from "./credentials.model";
  */
 export class AuthService {
   private isAuthenticated = new BehaviorSubject<boolean>(this.tokenService.loggedIn());
-  private apiUrl: string = 'http://127.0.0.1:8000/api';
+  private apiUrl: string = globals.apiURL;
   public authStatus = this.isAuthenticated.asObservable();
 
   constructor(
@@ -55,8 +56,7 @@ export class AuthService {
    * @return rxjs/Observable
    */
   signUp(credentials: Credentials) {
-    return this.http
-      .post(`${this.apiUrl}/signup`, credentials)
+    return this.http.post(`${this.apiUrl}/signup`, credentials)
       .pipe(catchError(respError => this.handleSentError(respError)
       ));
   }
@@ -68,7 +68,7 @@ export class AuthService {
    */
   handleSentData(data) {
     this.tokenService.setUserId(data.userId);
-    this.tokenService.handleRecievedToken(data.access_token);
+    this.tokenService.handleRecievedToken(data.access_token, data.expires_in);
     this.changeAuthStatus(true);
     this.router.navigateByUrl('/shops/all');
   }

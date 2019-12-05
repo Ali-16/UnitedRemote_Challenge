@@ -1,8 +1,12 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders, HttpResponse, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { map, catchError } from 'rxjs/operators';
+import * as moment from "moment";
+import * as globals from "src/app/shared/globals";
 
 import { Shop } from "./shop.model";
+import { TokenService } from 'src/app/shared/token.service';
+import { Observable, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: "root"
@@ -14,25 +18,30 @@ import { Shop } from "./shop.model";
  */
 export class ShopsService {
   public shops: Shop[];
-  private apiUrl: string = 'http://127.0.0.1:8000/api';
-  constructor(private http: HttpClient) {
+  private apiUrl: string = globals.apiURL;
+  constructor(private http: HttpClient, private tokenService: TokenService) {
   }
 
   /** 
    * Send Http Request to API backend to fetch Shops, handle response with handlefetchedshops method
    * Needs type of targeted shops, ID of authenticated user, and page to declare to API paginator
+   * 
    * @param userId
    * @param targetedShops
    * @param page
    * @return httpResponse
    */
   fetchShops(userId: string, targetedShops: string, page: number) {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('UID', userId);
+
     return this.http
-      .get(`${this.apiUrl}/shops/${targetedShops}?page=${page}&UID=${userId}`,
-        { observe: 'response' })
+      .get(`${this.apiUrl}/shops/${targetedShops}`,
+        { params: params, observe: 'response' })
       .pipe(
-        map(response => this.handlefetchedshops(response)
-        ));
+        map(this.handlefetchedshops)
+      );
   }
 
   /** 
@@ -51,44 +60,42 @@ export class ShopsService {
         shopsArray.push(response.body[shopIndex]);
       }
       return shopsArray;
+      return response.body;
     }
-
+    return response.body;
   }
 
-
-  fetchPreferedShops(userId: string) {
-    // Implement the logic Here
-    return this.shops;
-  }
-
-  fetchNearbyShops(userId: string, currentLocation: any) {
-    // Implement the logic Here
-    return this.shops;
+  private handleError(error: HttpErrorResponse) {
+    console.log(error);
+    return throwError(error);
   }
 
   /**
-   * Sends an Http PUT request to Backend API.
-   * Adds the current user Id in the relevant shop "LikedBy property"
+   * Sends an Http PATCH request to Backend API.
+   * Adds the current userId JSON in the relevant shop "DislikedBy property"
    * @param shop
    * @param userId current user Id
    * @return shop
    */
   addShopLiker(shop: Shop, userId: string) {
-    // Implement the logic Here
-    return shop;
+    return this.http
+      .patch(`${this.apiUrl}/shops/${shop._id}/liker`, { 'userId': userId });
   }
 
   /**
-   * Sends an Http PUT request to Backend API.
-   * Adds the current {user Id , date} JS Object in the relevant shop "DislikedBy property"
+   * Sends an Http PATCH request to Backend API.
+   * Adds the current {user Id , date} JSON in the relevant shop "DislikedBy array property"
    * @param shop
    * @param userId current user Id
    * @return shop
    */
   addShopDisliker(shop: Shop, userId: string) {
-    // Implement the logic Here
-    const timestamp = new Date().getTime();
-    return shop;
+    const disliketime = moment();
+    console.log(disliketime);
+
+    return this.http
+      .patch(`${this.apiUrl}/shops/${shop._id}/disliker`, { 'userId': userId });
+
   }
 
   /**

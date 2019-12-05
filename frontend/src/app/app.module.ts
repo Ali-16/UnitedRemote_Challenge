@@ -2,11 +2,10 @@ import { NgModule } from "@angular/core";
 import { AppComponent } from "./app.component";
 import { ReactiveFormsModule } from "@angular/forms";
 import { AppRoutingModule } from "./app-routing.module";
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserModule } from "@angular/platform-browser";
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { AuthComponent } from "./Authentification/auth/auth.component";
 import { SigninComponent } from "./Authentification/Auth/signin/signin.component";
@@ -15,6 +14,7 @@ import { NavbarComponent } from "./header/navbar/navbar.component";
 import { FooterComponent } from "./footer/footer.component";
 import { ShopsListComponent } from "./shops/shops-list/shops-list.component";
 import { ShopsItemComponent } from "./shops/shops-list/shops-item/shops-item.component";
+import { TokenInterceptorService } from './shared/token-interceptor.service';
 
 @NgModule({
   declarations: [
@@ -35,7 +35,13 @@ import { ShopsItemComponent } from "./shops/shops-list/shops-item/shops-item.com
     InfiniteScrollModule,
     NgxSpinnerModule,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptorService,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

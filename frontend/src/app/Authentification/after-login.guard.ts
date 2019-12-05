@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import {
   CanActivate,
-  CanActivateChild,
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
   UrlTree,
@@ -21,10 +20,10 @@ import { AuthService } from "./auth.service";
  */
 export class AfterLoginGuard implements CanActivate {
   constructor(
-    private authService: AuthService, 
+    private authService: AuthService,
     private router: Router,
     private tokenService: TokenService,
-    ) { }
+  ) { }
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -34,13 +33,6 @@ export class AfterLoginGuard implements CanActivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-      return this.tokenService.loggedIn();
-    // let isAuthenticated = this.tokenService.loggedIn();
-    // if (isAuthenticated){
-    //   return isAuthenticated;
-    // }
-    // else{
-    //   this.router.navigateByUrl('/login');
-    // }
+    return this.tokenService.loggedIn();
   }
 }

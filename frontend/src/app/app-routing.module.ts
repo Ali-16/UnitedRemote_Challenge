@@ -14,11 +14,12 @@ const routes: Routes = [
     component: ShopsListComponent,
     canActivate: [AfterLoginGuard]
   },
-  { path: "**", redirectTo: "shops/all" }
+  { path: '', redirectTo: "shops/all", pathMatch: 'full' },
+  { path: "**", redirectTo: "shops/all" },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

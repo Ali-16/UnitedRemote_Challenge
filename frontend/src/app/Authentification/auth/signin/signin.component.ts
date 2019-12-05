@@ -24,9 +24,9 @@ export class SigninComponent implements OnInit {
   }
 
   constructor(
-    private authService: AuthService, 
+    private authService: AuthService,
     private tokenService: TokenService,
-    ) { }
+  ) { }
 
   ngOnInit() {
     this.initSigninForm();
@@ -97,7 +97,7 @@ export class SigninComponent implements OnInit {
   }
 
   /** 
-   * Hand errors if it's an authenticated one
+   * Handles errors if it's an authenticated one
    */
   private handleErrors(error) {
     if (error === "Email & Password don't match") {
