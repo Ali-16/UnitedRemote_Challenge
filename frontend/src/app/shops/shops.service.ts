@@ -2,11 +2,12 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders, HttpResponse, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import * as moment from "moment";
-import * as globals from "src/app/shared/globals";
+import { Observable, throwError } from 'rxjs';
 
 import { Shop } from "./shop.model";
+import * as globals from "src/app/shared/globals";
 import { TokenService } from 'src/app/shared/token.service';
-import { Observable, throwError } from 'rxjs';
+import { GeoLocationService } from "./geo-location.service";
 
 @Injectable({
   providedIn: "root"
@@ -18,8 +19,34 @@ import { Observable, throwError } from 'rxjs';
  */
 export class ShopsService {
   public shops: Shop[];
+  private longitude: string;
+  public latitude: string;
   private apiUrl: string = globals.apiURL;
-  constructor(private http: HttpClient, private tokenService: TokenService) {
+  constructor(private http: HttpClient, private tokenService: TokenService, private locationService: GeoLocationService) {
+  }
+
+  /** 
+   * generated HttpParamas for fetch request
+   * 
+   * @param userId
+   * @param targetedShops
+   * @param page
+   * @return HttpParams
+   */
+  generateFetchParams(userId: string, targetedShops: string, page: number) {
+    if (targetedShops == 'nearby') {
+      this.setLocation();
+      return new HttpParams()
+        .set('page', page.toString())
+        .set('UID', userId)
+        .set('longitude', this.longitude)
+        .set('latitude', this.latitude);
+    }
+    else {
+      return new HttpParams()
+        .set('page', page.toString())
+        .set('UID', userId);
+    }
   }
 
   /** 
@@ -32,10 +59,7 @@ export class ShopsService {
    * @return httpResponse
    */
   fetchShops(userId: string, targetedShops: string, page: number) {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('UID', userId);
-
+    const params = this.generateFetchParams(userId, targetedShops, page);
     return this.http
       .get(`${this.apiUrl}/shops/${targetedShops}`,
         { params: params, observe: 'response' })
@@ -120,5 +144,21 @@ export class ShopsService {
   removeShopDisliker(shop: Shop, userId: string) {
     // Implement the logic Here
     return shop;
+  }
+
+  /**
+   * 
+   * Set Geo Coordinates properties, from locationService
+   * 
+   */
+  setLocation() {
+    this.locationService.getPosition()
+      .catch(error => {
+        alert(error.message);
+      })
+      .then(position => {
+        this.longitude = position.lng;
+        this.latitude = position.lat;
+      });
   }
 }

@@ -15,6 +15,7 @@ import { FooterComponent } from "./footer/footer.component";
 import { ShopsListComponent } from "./shops/shops-list/shops-list.component";
 import { ShopsItemComponent } from "./shops/shops-list/shops-item/shops-item.component";
 import { TokenInterceptorService } from './shared/token-interceptor.service';
+import { NotFoundComponent } from './not-found/not-found.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { TokenInterceptorService } from './shared/token-interceptor.service';
     FooterComponent,
     ShopsListComponent,
     ShopsItemComponent,
+    NotFoundComponent,
   ],
   imports: [
     BrowserModule,

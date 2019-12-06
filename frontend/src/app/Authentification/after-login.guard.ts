@@ -9,7 +9,6 @@ import {
 import { Observable } from "rxjs";
 
 import { TokenService } from 'src/app/shared/token.service';
-import { AuthService } from "./auth.service";
 
 @Injectable({
   providedIn: "root"
@@ -20,7 +19,6 @@ import { AuthService } from "./auth.service";
  */
 export class AfterLoginGuard implements CanActivate {
   constructor(
-    private authService: AuthService,
     private router: Router,
     private tokenService: TokenService,
   ) { }
@@ -33,6 +31,12 @@ export class AfterLoginGuard implements CanActivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-    return this.tokenService.loggedIn();
+      if(this.tokenService.loggedIn()){
+        return true;
+      }
+      else{
+        this.router.navigate(['/signin']);
+        return false;
+      }
   }
 }

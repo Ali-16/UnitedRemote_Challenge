@@ -4,7 +4,6 @@ import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { AuthService } from "../../auth.service";
 import { Credentials } from '../../credentials.model';
 import { AuthErrors } from '../../auth-errors.model';
-import { TokenService } from 'src/app/shared/token.service';
 
 @Component({
   selector: "app-signup",
@@ -26,12 +25,11 @@ export class SignupComponent implements OnInit {
   }
 
   constructor(
-    private authService: AuthService, 
-    private tokenService: TokenService
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
-    this.initSignupForm();
+    this.initSignupForm(); //generate Signup Form Reactively
   }
 
   /**

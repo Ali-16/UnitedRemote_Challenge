@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Shop;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use DB;
 
 class ShopController extends Controller
 {
@@ -57,7 +58,8 @@ class ShopController extends Controller
     }
 
     /**
-     * Fetch All shops from Database, except disliked by the current user ones 
+     * Fetch All shops from Database, except disliked by the current user ones
+     * Returns chunck of Shops ordered by their distance from a given point
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -66,17 +68,21 @@ class ShopController extends Controller
     {
         global $userId;
         $userId = $request->UID;
-        $shops = Shop::orderBy('_id')->paginate(10);
-        $shop = Shop::findOrFail('5a0c6711fb3aac66aafe26c5');
+        $latitude = (float) $request->latitude;
+        $longitude = (float) $request->longitude;
+
+        $center = $this->createPoint($longitude, $latitude);
+        $shops = $this->retrieveShopsNearPoint_Query($center)->paginate(10);
+
+        $data = Shop::hydrate($shops->items());
 
         if ($shops->currentPage() > $shops->lastPage()) {
             return response(null, 204);
         } else {
-            $filteredShops = $shops->reject(function ($shop) {
+            $filteredShops = collect($data)->reject(function ($shop) {
                 global $userId;
                 return $this->isShopDisliked($shop, $userId);
             });
-            // return response()->json(isset($shop->dislikedBy[$userId]), 200);
             return response()->json($filteredShops, 200);
         }
     }
@@ -135,5 +141,41 @@ class ShopController extends Controller
         $shop->save();
 
         return response()->json($shop, 200);
+    }
+
+    /**
+     * Returns a querry builder that fetches shops ordered by distance from a given point
+     * @param $center
+     * 
+     * @return $queryBuilder
+     */
+    public function retrieveShopsNearPoint_Query($center)
+    {
+        $queryBuilder = DB::collection('shops');
+        return $queryBuilder->whereRaw(
+            [
+                'location' => [
+                    '$near' => [
+                        '$geometry' => $center,
+                    ]
+                ]
+            ]
+        );
+    }
+
+    /**
+     * Creates a  point from Geo Coordinates
+     * 
+     * @param $longitude
+     * @param $latitude
+     * 
+     * @return point
+     */
+    public function createPoint(float $longitude, float $latitude)
+    {
+        return array(
+            'type' => "Point",
+            'coordinates' => array($longitude, $latitude)
+        );
     }
 }

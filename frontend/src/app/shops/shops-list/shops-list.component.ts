@@ -38,9 +38,6 @@ export class ShopsListComponent implements OnInit {
     this.userId = this.tokenService.getUserId();
     this.guesstargetedShops();
     this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
-    if (this.targetedShops === 'nearby') {
-      this.getLocation();
-    }
   }
 
   /**
@@ -75,14 +72,12 @@ export class ShopsListComponent implements OnInit {
     this.moreToFetch = (loadedShops !== null) ? true : false;
     if (this.moreToFetch) {
       this.shops = this.shops.concat(loadedShops);
+      if (loadedShops.length < 10) {
+        console.log('loadedshops.length = ', loadedShops.length)
+        this.onScroll();
+      }
       this.isScrolling = false;
     }
-
-    if (loadedShops.length < 10) {
-      console.log('loadedshops.length = ', loadedShops.length)
-      this.onScroll();
-    }
-
   }
 
   /**
@@ -114,7 +109,7 @@ export class ShopsListComponent implements OnInit {
         this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
       }
       else {
-        this.router.navigateByUrl('/shops/all');
+        this.router.navigateByUrl('/notfound');
       }
     });
   }
@@ -170,21 +165,5 @@ export class ShopsListComponent implements OnInit {
   onRemoveShopLiker(shop: Shop, userId: string) {
     this.shopsService.removeShopLiker(shop, userId);
     this.shops.splice(this.shops.indexOf(shop), 1);
-  }
-
-  /**
-   * use location service to location of the current user
-   * if he permits geolocation, alert user on it.
-   */
-  private getLocation() {
-    this.route.params.subscribe((params: Params) => {
-      this.locationService.getPosition()
-        .catch(error => {
-          alert(error.message);
-        })
-        .then(position => {
-          alert(`Positon: ${position.lng} , ${position.lat}`);
-        });
-    });
   }
 }
