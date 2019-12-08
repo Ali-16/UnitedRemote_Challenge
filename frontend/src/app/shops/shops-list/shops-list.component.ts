@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ActivatedRoute, Params, Router } from "@angular/router";
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { ShopsService } from "../shops.service";
 import { Shop } from "../shop.model";
@@ -37,26 +38,40 @@ export class ShopsListComponent implements OnInit {
   ngOnInit() {
     this.userId = this.tokenService.getUserId();
     this.guesstargetedShops();
-    this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
+  }
+
+  /**
+ * Guess the type of shops targeted in function of current Url
+ * Subscribes to activated route observable
+ */
+  private guesstargetedShops() {
+    this.route.params.subscribe((params: Params) => {
+      if (['all', 'prefered', 'nearby'].includes(params['target'])) {
+        this.targetedShops = params["target"];
+        this.shops = [];
+        this.currentPage = 1;
+        this.onFetchShops(this.targetedShops, this.currentPage);
+
+      }
+      else {
+        this.router.navigateByUrl('/notfound');
+      }
+    });
   }
 
   /**
    * Calls shopService to fetch wanted shops, 
-   * by giving authenticated userId, targetedShops and page number for backend API
-   * @param userId
+   * by giving targetedShops and page number for backend API
    * @param target
    * @param page
     */
-  onFetchShops(userId: string, target: string, page: number) {
-    console.log('onFetchShops()');
-    this.shopsService.fetchShops(userId, target, page).subscribe(
+  private onFetchShops(target: string, page: number) {
+    this.shopsService.fetchShops(target, page).subscribe(
       responseData => {
         this.handleFetchResponse(responseData);
-        this.spinner.hide();
       },
       responseError => {
-        console.log(responseError);
-        this.spinner.hide();
+        this.handleFetchError(responseError)
       }
     );
   }
@@ -67,17 +82,21 @@ export class ShopsListComponent implements OnInit {
    * @param data : Shop[]
    */
   private handleFetchResponse(data: Shop[]) {
-    console.log('handleFetchResponse()');
+    this.spinner.hide();
     let loadedShops = data;
     this.moreToFetch = (loadedShops !== null) ? true : false;
     if (this.moreToFetch) {
       this.shops = this.shops.concat(loadedShops);
       if (loadedShops.length < 10) {
-        console.log('loadedshops.length = ', loadedShops.length)
         this.onScroll();
       }
       this.isScrolling = false;
     }
+  }
+
+  private handleFetchError(error: HttpErrorResponse) {
+    console.log(error);
+    this.spinner.hide();
   }
 
   /**
@@ -86,32 +105,12 @@ export class ShopsListComponent implements OnInit {
    * shows Spinner, then use shopService to fetch new shops
     */
   private onScroll() {
-    console.log(' onScroll!! ');
     if (!this.isScrolling && this.moreToFetch) {
       this.currentPage++;
-      console.log(' page ', this.currentPage);
       this.spinner.show();
       this.isScrolling = true;
-      this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
+      this.onFetchShops(this.targetedShops, this.currentPage);
     }
-  }
-
-  /**
-   * Guess the type of shops targeted in function of current Url
-   * Subscribes to activated route observable
-   */
-  private guesstargetedShops() {
-    this.route.params.subscribe((params: Params) => {
-      if (['all', 'prefered', 'nearby'].includes(params['target'])) {
-        this.targetedShops = params["target"];
-        this.shops = [];
-        this.currentPage = 1;
-        this.onFetchShops(this.userId, this.targetedShops, this.currentPage);
-      }
-      else {
-        this.router.navigateByUrl('/notfound');
-      }
-    });
   }
 
   /**
@@ -120,7 +119,7 @@ export class ShopsListComponent implements OnInit {
    * @param shop Shop relevant to the event
    * @param userId current User Id
    */
-  onAddShopLiker(shop: Shop, userId: string) {
+  private onAddShopLiker(shop: Shop) {
     this.shopsService.addShopLiker(shop, this.userId).subscribe(
       responseData => {
         this.handleLikeResponse(responseData);
@@ -137,7 +136,7 @@ export class ShopsListComponent implements OnInit {
    * @param shop Shop relevant to the event
    * @param userId current User Id
    */
-  onAddShopDisliker(shop: Shop) {
+  private onAddShopDisliker(shop: Shop) {
     this.shopsService.addShopDisliker(shop, this.userId).subscribe(
       responseData => {
         this.handleDislikeResponse(responseData);
@@ -148,12 +147,8 @@ export class ShopsListComponent implements OnInit {
     }
   }
 
-  private handleDislikeResponse(data) {
-    console.log(data);
-  }
-
-  private handleLikeResponse(data) {
-    console.log(data);
+  private handleLikeResponse(Data) {
+    // console.log(Data);
   }
 
   /**
@@ -162,8 +157,18 @@ export class ShopsListComponent implements OnInit {
    * @param shop Shop relevant to the event
    * @param userId current User Id
    */
-  onRemoveShopLiker(shop: Shop, userId: string) {
-    this.shopsService.removeShopLiker(shop, userId);
-    this.shops.splice(this.shops.indexOf(shop), 1);
+  private onRemoveShopLiker(shop: Shop, userId: string) {
+    this.shopsService.removeShopLiker(shop, this.userId).subscribe(
+      responseData => {
+        this.handleLikeResponse(responseData);
+      }
+    );
+    if (this.targetedShops === 'prefered') {
+      this.shops.splice(this.shops.indexOf(shop), 1);
+    }
+  }
+
+  private handleDislikeResponse(Data) {
+    // console.log(Data);
   }
 }

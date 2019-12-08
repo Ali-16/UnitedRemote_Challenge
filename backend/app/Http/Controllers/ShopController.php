@@ -3,22 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Shop;
+use App\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use DB;
+use Illuminate\Support\Facades\Gate;
+
 
 class ShopController extends Controller
 {
     /**
-     * Fetch All shops from Database, except liked by the current user ones 
+     * Retrieves All shops from Database, except liked by authenticated user ones 
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function fetchAllShops(Request $request)
+    public function fetchAllShops()
     {
         global $userId;
-        $userId = $request->UID;
+        $userId = auth()->user()->_id;
         $shops = Shop::orderBy('_id')->paginate(10);
 
         if ($shops->currentPage() > $shops->lastPage()) {
@@ -28,37 +30,12 @@ class ShopController extends Controller
                 global $userId;
                 return (is_array($shop->likedBy) && in_array($userId, $shop->likedBy));
             });
-            // return response()->json(in_array($userId, $shop->likedBy), 200);
             return response()->json($filteredShops, 200);
         }
     }
 
     /**
-     * Add a liker user to the shop
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function addLiker(Request $request, $shopId)
-    {
-        $userId = $request->input('userId');
-        $shop = Shop::findOrFail($shopId);
-
-        if (is_array($shop->likedBy)) {
-            $likes = $shop->likedBy;
-            if (!in_array($userId, $likes)) $likes[] = $userId;
-        } else {
-            $likes[] = $userId;
-        }
-
-        $shop->likedBy = $likes;
-        $shop->save();
-
-        return response()->json($shop, 200);
-    }
-
-    /**
-     * Fetch All shops from Database, except disliked by the current user ones
+     * Retrieves All shops from Database, except disliked by the authenticated user ones
      * Returns chunck of Shops ordered by their distance from a given point
      *
      * @param  \Illuminate\Http\Request  $request
@@ -67,7 +44,7 @@ class ShopController extends Controller
     public function fetchNearbyShops(Request $request)
     {
         global $userId;
-        $userId = $request->UID;
+        $userId = auth()->user()->_id;
         $latitude = (float) $request->latitude;
         $longitude = (float) $request->longitude;
 
@@ -85,6 +62,89 @@ class ShopController extends Controller
             });
             return response()->json($filteredShops, 200);
         }
+    }
+
+    /** 
+     * Retrieves, from Database, shops that was liked by the authenticated user
+     * 
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response $filteredShops
+     */
+    public function fetchPreferedShops()
+    {
+        global $userId;
+        $userId = auth()->user()->_id;
+        $shops = Shop::orderBy('_id')->paginate(10);
+
+        if ($shops->currentPage() > $shops->lastPage()) {
+            return response(null, 204);
+        } else {
+            $filteredShops = $shops->filter(function ($shop) {
+                global $userId;
+                if (!is_array($shop->likedBy)) {
+                    return false;
+                } elseif (!in_array($userId, $shop->likedBy)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+            return response()->json($filteredShops, 200);
+        }
+    }
+
+    /**
+     * Add a liker user to the shop
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param string $shopId
+     * @return \Illuminate\Http\Response $shop
+     */
+    public function addLiker(Request $request, string $shopId)
+    {
+        $userId = $request->input('userId');
+        $user = User::findOrFail($userId);
+        Gate::authorize('update-shop-likeliness', $userId);
+        $shop = Shop::findOrFail($shopId);
+
+        if (is_array($shop->likedBy)) {
+            $likes = $shop->likedBy;
+            if (!in_array($userId, $likes)) $likes[] = $userId;
+        } else {
+            $likes[] = $userId;
+        }
+
+        $shop->likedBy = $likes;
+        $shop->save();
+
+        return response()->json($shop, 200);
+    }
+
+    /**
+     * remove liker user from a shop
+     * Update a defined shop by remove userId from its likedBy property
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param string $shopId
+     * @return \Illuminate\Http\Response
+     */
+    public function removeLiker(Request $request, $shopId)
+    {
+        $userId = $request->input('userId');
+        $user = User::findOrFail($userId);
+        Gate::authorize('update-shop-likeliness', $userId);
+        $shop = Shop::findOrFail($shopId);
+
+        if (is_array($shop->likedBy)) {
+            $likes = $shop->likedBy;
+            $likeKey = array_search($userId, $likes);
+            if ($likeKey !== false) {
+                unset($likes[$likeKey]);
+                $shop->likedBy = array_values($likes);
+                $shop->save();
+            }
+        }
+        return response()->json($shop, 200);
     }
 
     /**
@@ -119,6 +179,8 @@ class ShopController extends Controller
     public function addDisliker(Request $request, string $shopId)
     {
         $userId = $request->input('userId');
+        $user = User::findOrFail($userId);
+        Gate::authorize('update-shop-likeliness', $userId);
         $shop = Shop::findOrFail($shopId);
 
         $dislikes = $shop->dislikedBy;
@@ -134,6 +196,8 @@ class ShopController extends Controller
      */
     public function removeDisliker(string $userId, Shop $shop)
     {
+        $user = User::findOrFail($userId);
+        Gate::authorize('update-shop-likeliness', $userId);
         $dislikes = $shop->dislikedBy;
         if (isset($dislikes[$userId])) unset($dislikes[$userId]);
 

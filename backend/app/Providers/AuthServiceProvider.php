@@ -25,6 +25,10 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        Gate::define('update-shop-likeliness', function ($user, $userId) {
+            return $user->_id == $userId;
+        });
+
         //
     }
 }

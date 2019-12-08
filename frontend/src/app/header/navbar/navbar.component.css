@@ -10,8 +10,13 @@
 
 .nav-item a {
   color: #fff;
+  cursor: pointer;
 }
 
 .activated {
   text-decoration: underline;
+}
+
+.modal-content {
+  background-color: rgb(241, 241, 222);
 }

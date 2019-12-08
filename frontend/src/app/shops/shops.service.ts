@@ -22,44 +22,42 @@ export class ShopsService {
   private longitude: string;
   public latitude: string;
   private apiUrl: string = globals.apiURL;
-  constructor(private http: HttpClient, private tokenService: TokenService, private locationService: GeoLocationService) {
+  constructor(private http: HttpClient,
+    private tokenService: TokenService,
+    private locationService: GeoLocationService) {
   }
 
   /** 
    * generated HttpParamas for fetch request
    * 
-   * @param userId
    * @param targetedShops
    * @param page
    * @return HttpParams
    */
-  generateFetchParams(userId: string, targetedShops: string, page: number) {
+  private generateFetchParams(targetedShops: string, page: number) {
     if (targetedShops == 'nearby') {
       this.setLocation();
       return new HttpParams()
         .set('page', page.toString())
-        .set('UID', userId)
         .set('longitude', this.longitude)
         .set('latitude', this.latitude);
     }
     else {
       return new HttpParams()
         .set('page', page.toString())
-        .set('UID', userId);
     }
   }
 
   /** 
    * Send Http Request to API backend to fetch Shops, handle response with handlefetchedshops method
-   * Needs type of targeted shops, ID of authenticated user, and page to declare to API paginator
+   * Needs type of targeted shops, and page to declare to API paginator
    * 
-   * @param userId
    * @param targetedShops
    * @param page
    * @return httpResponse
    */
-  fetchShops(userId: string, targetedShops: string, page: number) {
-    const params = this.generateFetchParams(userId, targetedShops, page);
+  fetchShops(targetedShops: string, page: number) {
+    const params = this.generateFetchParams(targetedShops, page);
     return this.http
       .get(`${this.apiUrl}/shops/${targetedShops}`,
         { params: params, observe: 'response' })
@@ -130,28 +128,16 @@ export class ShopsService {
    * @return shop
    */
   removeShopLiker(shop: Shop, userId: string) {
-    // Implement the logic Here
-    return shop;
+    console.log('UserId: ', userId);
+    console.log('Shop: ', shop);
+    return this.http
+      .patch(`${this.apiUrl}/shops/${shop._id}/removeliker`, { 'userId': userId });
   }
 
   /**
-   * Sends an Http PUT request to Backend API.
-   * Removes the {user Id , date} JS Object from the relevant shop "DislikedBy property", after two hours from specified date
-   * @param shop
-   * @param userId current user Id
-   * @return shop
-   */
-  removeShopDisliker(shop: Shop, userId: string) {
-    // Implement the logic Here
-    return shop;
-  }
-
-  /**
-   * 
    * Set Geo Coordinates properties, from locationService
-   * 
    */
-  setLocation() {
+  private setLocation() {
     this.locationService.getPosition()
       .catch(error => {
         alert(error.message);

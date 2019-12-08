@@ -1,29 +1,13 @@
-<nav
-  class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top"
-  id="main-nav"
->
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top" id="main-nav">
   <div class="container">
-    <a class="navbar-brand " href="#"
-      ><img
-        src="assets/images/Logo.png"
-        width="40rem"
-        alt="Logo"
-        class="d-inline-block align-middle mr-2"
-    /></a>
-    <button
-      class="navbar-toggler"
-      data-toggle="collapse"
-      data-target="#navbarCollapse"
-    >
+    <a class="navbar-brand " href="#"><img src="assets/images/Logo.png" width="40rem" alt="Logo"
+        class="d-inline-block align-middle mr-2" /></a>
+    <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul *ngIf="isAuthenticated" class="navbar-nav ml-auto authenticated-nav">
-        <li
-          routerLinkActive="activated"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="nav-item"
-        >
+        <li routerLinkActive="activated" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
           <a class="nav-link" routerLink="shops/all">Home</a>
         </li>
         <li routerLinkActive="activated" class="nav-item">
@@ -32,14 +16,18 @@
         <li routerLinkActive="activated" class="nav-item">
           <a class="nav-link" routerLink="shops/prefered">prefered shops</a>
         </li>
-        <li routerLinkActive="activated" class="nav-item">
-          <a class="nav-link" href="" (click)="logout($event)">Sign Out</a>
+        <li class="dropdown hide nav-item" id="menuUser">
+          <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+            <i class='icon-user icon-xxlarge'> </i> <span class="fas fa-user"> </span> {{userName}}
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li class="pl-3" data-toggle="modal" data-target="#logout-confirmation"><a class="text-dark"><span
+                  class="fas fa-sign-out-alt"> Signout</span></a></li>
+          </ul>
         </li>
       </ul>
-      <ul
-        *ngIf="!isAuthenticated"
-        class="navbar-nav ml-auto unauthenticated-nav"
-      >
+      <ul *ngIf="!isAuthenticated" class="navbar-nav ml-auto unauthenticated-nav">
         <li routerLinkActive="activated" class="nav-item">
           <a class="nav-link" routerLink="/signin">Sign In</a>
         </li>
@@ -50,3 +38,18 @@
     </div>
   </div>
 </nav>
+<!-- logout Confirmation Modal -->
+<div class="modal fade" id="logout-confirmation" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <p class="text-dark">Are you sure you want to Log Out?!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="buttoon" class="btn btn-danger" data-dismiss="modal" (click)="confirmLogout()">Yes</button>
+        <button type="buttoon" class="btn btn-success" data-dismiss="modal">
+          No</button>
+      </div>
+    </div>
+  </div>
+</div>

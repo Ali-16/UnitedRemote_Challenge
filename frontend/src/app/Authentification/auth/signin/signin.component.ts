@@ -4,6 +4,7 @@ import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { AuthService } from "../../auth.service";
 import { Credentials } from '../../credentials.model';
 import { AuthErrors } from '../../auth-errors.model';
+import * as globals from "src/app/shared/globals";
 
 @Component({
   selector: "app-signin",
@@ -33,10 +34,11 @@ export class SigninComponent implements OnInit {
   /**
    * Initialize the signup form in the component,
    * and bind it to template template form
+   * Validators.pattern(globals.emailRegEx)
    */
   private initSigninForm() {
     this.signinForm = new FormGroup({
-      email: new FormControl(null, [Validators.required, Validators.email]),
+      email: new FormControl(null, [Validators.required, Validators.email,]),
       password: new FormControl(null, [
         Validators.required,
         Validators.pattern(/[a-zA-Z0-9]{6,}/)

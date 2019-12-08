@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as moment from "moment";
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 import * as globals from './globals'
 
@@ -10,26 +11,20 @@ import * as globals from './globals'
 })
 export class TokenService {
 
-  private trustedTokenIssuer = {
-    signin: `${globals.apiURL}/signin`,
-    signup: `${globals.apiURL}/signup`,
-    refresh: `${globals.apiURL}/refresh`
-  };
-
   constructor(private httpClient: HttpClient) { }
 
   /**
    * First handle of token sent from auth Service
    */
   handleRecievedToken(token: string, expires: number) {
-    this.setToken(token, expires);
+    this.setToken(token, expires * 60);
   }
 
   /**
    * Stores JWT token and related data at localStorage of the browser
    * @param token 
    */
-  setToken(token: string, expires: number) {
+  private setToken(token: string, expires: number) {
     localStorage.setItem('token', token);
     localStorage.setItem('tokenLifeTime', expires.toString());
     this.setTokenExpiration();
@@ -39,14 +34,15 @@ export class TokenService {
    * Stores JWT token at localStorage of the browser
    * @param token 
    */
-  setUserId(userId: string) {
+  setUserData(userId: string, email: string) {
     localStorage.setItem('userId', userId);
+    localStorage.setItem('email', email);
   }
 
   /**
    * Retrieves JWT token from localStorage of the browser
    */
-  getStoredToken() {
+  private getStoredToken() {
     return localStorage.getItem('token');
   }
 
@@ -54,7 +50,7 @@ export class TokenService {
    * Stores token-Exiration related data
    * use moment.js Library to handle time operations
    */
-  setTokenExpiration() {
+  private setTokenExpiration() {
     const now = moment();
     const tokenLifeTime = localStorage.getItem('tokenLifeTime');
     const expirate_at = now.add(tokenLifeTime, "seconds");
@@ -71,7 +67,7 @@ export class TokenService {
   /** 
    * gets stored life deadline of stored token from localStorage
    */
-  getTokenExpiration() {
+  private getTokenExpiration() {
     const expires_at_string = localStorage.getItem('expires_at');
     return moment(expires_at_string);
   }
@@ -92,12 +88,12 @@ export class TokenService {
     localStorage.removeItem('userId');
   }
 
-  getTokenPayload(token) {
+  private getTokenPayload(token) {
     const payload = token.split('.')[1];
     return this.decodePayload(payload);
   }
 
-  decodePayload(payload) {
+  private decodePayload(payload) {
     return JSON.parse(atob(payload));
   }
 
@@ -105,12 +101,12 @@ export class TokenService {
    * Checks if the retrieved token from locaStrorage is real one,
    * by checken its issuer and compare it with trusted backend API
    */
-  isTokenValid() {
+  private isTokenValid() {
     const token = this.getStoredToken();
     if (token) {
       const tokenPayload = this.getTokenPayload(token);
       if (tokenPayload) {
-        return (Object.values(this.trustedTokenIssuer).indexOf(tokenPayload.iss) > -1);
+        return (Object.values(globals.trustedTokenIssuer).indexOf(tokenPayload.iss) > -1);
       }
     }
     else {
@@ -132,10 +128,11 @@ export class TokenService {
    * @return Observable
    */
   getNotExpiredToken() {
-    const safetyMarginTokenExpiration = this.getTokenExpiration().subtract(10, "seconds");
+    const safetyMarginTokenExpiration = this.getTokenExpiration().subtract(5, "minutes");
     const notExpired = moment().isBefore(safetyMarginTokenExpiration);
 
     if (!notExpired) {
+      console.log('is before: ', notExpired);
       return this.makeRefreshTokenObservable();
     }
     else {
@@ -146,7 +143,7 @@ export class TokenService {
   /** 
    * Creates Observable for stored token value
    */
-  makeTokenObservable() {
+  private makeTokenObservable() {
     return new Observable(
       subscriber => {
         const storedToken = this.getStoredToken();
@@ -165,16 +162,14 @@ export class TokenService {
    * Creates Observable for stored token value
    * and stor new token at localStorage
    */
-  makeRefreshTokenObservable() {
+  private makeRefreshTokenObservable() {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': ('Bearer ' + this.getStoredToken())
     });
-    const RefreshTokenObservable = this.httpClient.get<any>('http://127.0.0.1:8000/api/refresh', { headers: headers });
-
-    RefreshTokenObservable.subscribe(RefreshToken => {
-      this.setToken(RefreshToken.access_token, RefreshToken.expires_in)
-    });
+    const RefreshTokenObservable = this.httpClient.get<any>('http://127.0.0.1:8000/api/refresh', { headers: headers }).pipe(
+      tap(refreshToken => this.setToken(refreshToken.access_token, refreshToken.expires_in))
+    );
     return RefreshTokenObservable;
   }
 }

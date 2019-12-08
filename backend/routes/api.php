@@ -22,7 +22,8 @@ Route::group([
      */
     Route::get('shops/all', 'ShopController@fetchAllShops');
     Route::get('shops/nearby', 'ShopController@fetchNearbyShops');
+    Route::get('shops/prefered', 'ShopController@fetchPreferedShops');
     Route::patch('shops/{shop}/disliker', 'ShopController@addDisliker');
     Route::patch('shops/{shop}/liker', 'ShopController@addLiker');
-    Route::patch('shops/{shop}/removedisliker', 'ShopController@removeDisliker');
+    Route::patch('shops/{shop}/removeliker', 'ShopController@removeLiker');
 });

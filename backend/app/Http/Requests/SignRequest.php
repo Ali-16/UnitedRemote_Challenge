@@ -29,6 +29,7 @@ class SignRequest extends FormRequest
              */
             'email' => 'sometimes|bail|required|email|exists:users',
             'password' => 'sometimes|bail|required|between:6,25',
+
             /**
              * Rules for **singUp** requests
              */

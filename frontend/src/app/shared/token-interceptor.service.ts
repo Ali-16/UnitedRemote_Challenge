@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { TokenService } from './token.service';
-import { catchError, retry } from 'rxjs/operators';
+import { catchError, tap, switchMap } from 'rxjs/operators';
 
 import * as globals from './globals';
-import { stringify } from 'querystring';
+import { AuthService } from '../Authentification/auth.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -21,30 +22,42 @@ import { stringify } from 'querystring';
  */
 export class TokenInterceptorService implements HttpInterceptor {
   private apiUrl: string = globals.apiURL;
+  auth: any;
 
-  constructor(private tokenService: TokenService) { }
+  constructor(private tokenService: TokenService,
+    private authService: AuthService,
+    private router: Router) { }
 
   /**
-   * Main function of the service, which add token headers to intercepted requests
-   * 
-   * @param req 
-   * @param next 
-   * 
-   * @return HttpRequest
-   */
+     * Main function of the service, which add token headers to intercepted requests
+     * 
+     * @param req 
+     * @param next 
+     * 
+     * @return HttpHandler
+     */
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (!([`${this.apiUrl}/signin`, `${this.apiUrl}/signup`, `${this.apiUrl}/refresh`].includes(req.url))) {
-
-      const token = this.getValidToken();
-      const headers = this.generateTokenHeaders(token);
-      const clonedReq = req.clone({ headers: headers });
-
-      return next.handle(clonedReq).pipe(
-        catchError((error: HttpErrorResponse) => this.handleError(error))
+    if (this.isDataRequest(req)) {
+      return this.tokenService.getNotExpiredToken().pipe(
+        catchError((error: HttpErrorResponse) => this.handleError(error)),
+        switchMap(tokenResponse => {
+          const headers = this.generateTokenHeaders(tokenResponse.access_token);
+          const newRequest = req.clone({ headers: headers });
+          return next.handle(newRequest);
+        })
       );
+    } else {
+      return next.handle(req);
     }
+  }
 
-    return next.handle(req);
+  /** 
+   * Cheks if a give httpRequest is data-related request
+   * @param HttpRequest
+   * @return boolean
+   */
+  private isDataRequest(req: HttpRequest<any>) {
+    return !([`${this.apiUrl}/signin`, `${this.apiUrl}/signup`, `${this.apiUrl}/refresh`].includes(req.url));
   }
 
   /**
@@ -61,38 +74,34 @@ export class TokenInterceptorService implements HttpInterceptor {
     return headers;
   }
 
-  /**
-   * Subscribe to tokenService Observable to get a valid Token
-   * @return token
-   */
-  getValidToken() {
-    let validToken: string;
-
-    const tokenSubscriber = this.tokenService.getNotExpiredToken()
-      .subscribe(
-        tokenResponse => {
-          validToken = tokenResponse.access_token;
-        },
-        error => {
-          console.log(error);
-        }
-      );
-
-    return validToken;
-  }
-
   /** 
    * Handles Http response Errors 
    */
-  private handleError(sentError) {
-    let errorMessage = 'An unknown error occured!';
-    if (!sentError.error) {
-      return throwError(errorMessage);
+  private handleError(sentError: HttpErrorResponse) {
+    switch (sentError.status) {
+      case 401: {
+        alert('You have inactive for a long time. You will get logged out..');
+        this.authService.logout();
+        break;
+      }
+      case 404: {
+        this.router.navigateByUrl('/notfound');
+        break;
+      }
+      default: {
+        let errorMessage = 'An unknown error occured!';
+        if (!sentError.error) {
+          return throwError(errorMessage);
+        }
+        else if (sentError.error && !sentError.error.errors) {
+          return throwError(sentError.error.error);
+        }
+        return throwError(sentError.error.errors);
+      }
     }
-    else if (sentError.error && !sentError.error.errors) {
-      return throwError(sentError.error.error);
-    }
-    return throwError(sentError.error.errors);
+
+
+
   }
 
 }

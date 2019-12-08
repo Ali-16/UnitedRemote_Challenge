@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { throwError, BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
@@ -61,13 +61,20 @@ export class AuthService {
       ));
   }
 
+  logout() {
+    this.tokenService.removeToken();
+    this.tokenService.removeUserId();
+    this.router.navigateByUrl('/signin');
+    this.changeAuthStatus(false);
+  }
+
   /** 
    * Handles response data
    * Calls tokenService to deal with recieved JWT token
    * Log the user in the application and prevent subscribers to auth status
    */
   handleSentData(data) {
-    this.tokenService.setUserId(data.userId);
+    this.tokenService.setUserData(data.userId,data.email);
     this.tokenService.handleRecievedToken(data.access_token, data.expires_in);
     this.changeAuthStatus(true);
     this.router.navigateByUrl('/shops/all');
@@ -78,7 +85,7 @@ export class AuthService {
    * Returns them to sign-related components to display
    * @param sentError
   */
-  handleSentError(sentError) {
+  handleSentError(sentError: HttpErrorResponse) {
     let errorMessage = 'An unknown error occured!';
     if (!sentError.error) {
       return throwError(errorMessage);

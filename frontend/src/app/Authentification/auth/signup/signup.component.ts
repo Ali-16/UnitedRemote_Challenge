@@ -4,6 +4,7 @@ import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { AuthService } from "../../auth.service";
 import { Credentials } from '../../credentials.model';
 import { AuthErrors } from '../../auth-errors.model';
+import * as globals from "src/app/shared/globals";
 
 @Component({
   selector: "app-signup",
@@ -36,9 +37,9 @@ export class SignupComponent implements OnInit {
    * Initialize the signup form in the component,
    * and bind it to template template form
    */
-  initSignupForm() {
+  private initSignupForm() {
     this.signupForm = new FormGroup({
-      register_email: new FormControl(null, [Validators.required, Validators.email]),
+      register_email: new FormControl(null, [Validators.required, Validators.email, Validators.pattern(globals.emailRegEx)]),
       passwords: new FormGroup({
         register_password: new FormControl(null, [
           Validators.required,
@@ -59,7 +60,7 @@ export class SignupComponent implements OnInit {
    * @param passwords
    * @return null if passes match and an object if not.
    */
-  doesPasswordsMatch(passwords: FormGroup): { [key: string]: any } | null {
+  private doesPasswordsMatch(passwords: FormGroup): { [key: string]: any } | null {
     const password = passwords.get("register_password").value;
     const password_confirmation = passwords.get("register_password_confirmation").value;
     return password === password_confirmation ? null : { dontMatch: true };
@@ -71,7 +72,7 @@ export class SignupComponent implements OnInit {
    * @param FormControl
    * @return Boolean
    */
-  isInValid(formControl: FormControl): Boolean {
+  private isInValid(formControl: FormControl): Boolean {
     return (formControl.touched && formControl.dirty && !formControl.valid);
   }
 
@@ -81,7 +82,7 @@ export class SignupComponent implements OnInit {
    * @param FormControl
    * @return Boolean
    */
-  isValid(formControl: FormControl): Boolean {
+  private isValid(formControl: FormControl): Boolean {
     return (formControl.touched && formControl.dirty && formControl.valid);
   }
 
@@ -90,7 +91,7 @@ export class SignupComponent implements OnInit {
    * according to tules defined in initSigninForm
    * @return Boolean
    */
-  isConfirmInvalid(): Boolean {
+  private isConfirmInvalid(): Boolean {
     return (
       (!this.signupForm.get('passwords').valid
         && this.signupForm.get('passwords.register_password_confirmation').dirty)
@@ -104,7 +105,7 @@ export class SignupComponent implements OnInit {
    * generates Credentrials from signup form, according to credentials.model
    * @return Credentials
    */
-  generateCredentials(signupForm: FormGroup): Credentials {
+  private generateCredentials(signupForm: FormGroup): Credentials {
     const register_email = signupForm.get("register_email").value;
     const register_password = signupForm.get("passwords").get('register_password').value;
     const register_password_confirmation = signupForm.get("passwords").get('register_password_confirmation').value;
@@ -115,7 +116,7 @@ export class SignupComponent implements OnInit {
    * triggered when user attempts to register, subscribes to observable sent by AuthService
    * Handle response data and eventual reponse errors
    */
-  onSignup() {
+  private onSignup() {
     this.isLoading = true;
     const credentials = this.generateCredentials(this.signupForm);
     this.authService.signUp(credentials)
