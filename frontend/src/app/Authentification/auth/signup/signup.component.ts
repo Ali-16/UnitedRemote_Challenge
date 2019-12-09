@@ -39,7 +39,7 @@ export class SignupComponent implements OnInit {
    */
   private initSignupForm() {
     this.signupForm = new FormGroup({
-      register_email: new FormControl(null, [Validators.required, Validators.email, Validators.pattern(globals.emailRegEx)]),
+      register_email: new FormControl(null, [Validators.required, Validators.email]),
       passwords: new FormGroup({
         register_password: new FormControl(null, [
           Validators.required,
