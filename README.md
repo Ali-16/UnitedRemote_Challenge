@@ -92,7 +92,7 @@ Publish Jessengers (jwt) config file, then generate a secret key for JWT encodin
 
 ```
 $ php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
-$ php artisan key:generate
+$ php artisan jwt:secret
 ```
 
 
